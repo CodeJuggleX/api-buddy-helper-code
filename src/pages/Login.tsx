@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import {
   Container,
@@ -34,7 +35,7 @@ const Login: React.FC = () => {
 
     setLoading(true);
     try {
-      const userData = await login(username, password);
+      const userData = await login({ username, password });
       dispatch({ type: 'LOGIN', payload: userData });
       toast({
         title: "Вход выполнен",

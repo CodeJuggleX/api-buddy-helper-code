@@ -1,6 +1,7 @@
+
 import { jwtDecode } from "jwt-decode";
 
-const API_BASE_URL = import.meta.env.VITE_API_URL;
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://192.168.38.236:8000/api/v1';
 
 const localStorageKey = "auth";
 
@@ -71,16 +72,14 @@ const clearAuth = () => {
   notifyListeners();
 };
 
-const login = async (
-  username: string,
-  password: string
-): Promise<{ accessToken: string; refreshToken: string }> => {
+// Fixed type signature to match the client code
+const login = async (credentials: { username: string; password: string }) => {
   const response = await fetch(`${API_BASE_URL}/auth/login/`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ username, password }),
+    body: JSON.stringify(credentials),
   });
 
   if (!response.ok) {
@@ -89,17 +88,19 @@ const login = async (
   }
 
   const data = await response.json();
-  return {
-    accessToken: data.access,
-    refreshToken: data.refresh,
-  };
+  
+  if (data.access && data.refresh) {
+    await setIntervalAuth(data.access, data.refresh);
+  }
+  
+  return data;
 };
 
 const logout = async (): Promise<void> => {
   clearAuth();
 };
 
-const refreshToken = async (refreshToken: string): Promise<string> => {
+const refreshAuthToken = async (refreshToken: string): Promise<string> => {
   const response = await fetch(`${API_BASE_URL}/auth/refresh/`, {
     method: "POST",
     headers: {
@@ -138,11 +139,11 @@ const startRefreshTokenInterval = (refreshToken: string) => {
 
   refreshInterval = setInterval(async () => {
     try {
-      const newAccessToken = await refreshToken(refreshToken);
+      const newAccessToken = await refreshAuthToken(refreshToken);
       setAuth({ accessToken: newAccessToken });
     } catch (error) {
       console.error("Token refresh failed:", error);
-      clearInterval(refreshInterval);
+      clearInterval(refreshInterval!);
     }
   }, 14 * 60 * 1000);
 };
@@ -193,7 +194,7 @@ export const register = async ({
       );
     }
     // регистрация успешна; можно добавить вход или редирект
-  } catch (error) {
+  } catch (error: any) {
     console.error('Registration error:', error);
     throw error;
   }
@@ -214,7 +215,7 @@ const subscribe = (listener: (authState: AuthState) => void) => {
 export {
   login,
   logout,
-  refreshToken,
+  refreshAuthToken as refreshToken,
   isAuthenticated,
   getAccessToken,
   getCurrentUser,
