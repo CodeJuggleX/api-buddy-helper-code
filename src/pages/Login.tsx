@@ -1,19 +1,15 @@
 
 import React, { useState } from 'react';
-import {
-  Container,
-  Paper,
-  Typography,
-  TextField,
-  Button,
-  Box,
-  Alert,
-  CircularProgress,
-} from '@mui/material';
 import { useNavigate, Navigate } from 'react-router-dom';
 import { login, isAuthenticated } from '../services/authService';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from "@/hooks/use-toast";
+
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Loader2 } from "lucide-react";
 
 const Login: React.FC = () => {
   const [username, setUsername] = useState('');
@@ -59,65 +55,74 @@ const Login: React.FC = () => {
   }
 
   return (
-    <Container maxWidth="sm" sx={{ py: 8 }}>
-      <Paper elevation={3} sx={{ p: 4 }}>
-        <Box textAlign="center" mb={4}>
-          <Typography variant="h4" fontWeight={500}>
-            Вход
-          </Typography>
-          <Typography variant="body1" color="text.secondary" mt={1}>
-            Войдите в свой аккаунт
-          </Typography>
-        </Box>
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <Card className="w-full max-w-md p-6">
+        <div className="text-center mb-6">
+          <h1 className="text-2xl font-bold mb-2">Вход</h1>
+          <p className="text-gray-600">Войдите в свой аккаунт</p>
+        </div>
+        
         {error && (
-          <Alert severity="error" sx={{ mb: 2 }}>
-            {error}
+          <Alert variant="destructive" className="mb-4">
+            <AlertDescription>{error}</AlertDescription>
           </Alert>
         )}
-        <Box component="form" onSubmit={handleSubmit}>
-          <TextField
-            label="Имя пользователя"
-            fullWidth
-            margin="normal"
-            variant="outlined"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            required
-            autoFocus
-          />
-          
-          <TextField
-            label="Пароль"
-            fullWidth
-            margin="normal"
-            variant="outlined"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-          
-          <Button
-            type="submit"
-            fullWidth
-            variant="contained"
-            color="primary"
-            size="large"
-            sx={{ mt: 3, mb: 2 }}
-            disabled={loading}
-          >
-            {loading ? <CircularProgress size={24} /> : "Войти"}
-          </Button>
-          <Button
-            fullWidth
-            variant="outlined"
-            onClick={() => navigate("/register")}
-          >
-            Нет аккаунта? Зарегистрироваться
-          </Button>
-        </Box>
-      </Paper>
-    </Container>
+        
+        <form onSubmit={handleSubmit}>
+          <div className="space-y-4">
+            <div className="space-y-1">
+              <label htmlFor="username" className="block text-sm font-medium">
+                Имя пользователя
+              </label>
+              <Input
+                id="username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                required
+                autoFocus
+              />
+            </div>
+            
+            <div className="space-y-1">
+              <label htmlFor="password" className="block text-sm font-medium">
+                Пароль
+              </label>
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+            </div>
+            
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={loading}
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Вход...
+                </>
+              ) : (
+                "Войти"
+              )}
+            </Button>
+            
+            <Button
+              variant="outline"
+              className="w-full"
+              type="button"
+              onClick={() => navigate("/register")}
+            >
+              Нет аккаунта? Зарегистрироваться
+            </Button>
+          </div>
+        </form>
+      </Card>
+    </div>
   );
 };
 

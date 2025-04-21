@@ -1,18 +1,14 @@
 
 import React, { useState } from "react";
-import {
-  Container,
-  Paper,
-  Typography,
-  TextField,
-  Button,
-  Box,
-  Alert,
-  CircularProgress,
-} from "@mui/material";
 import { useNavigate, Navigate } from "react-router-dom";
 import { isAuthenticated, register } from "../services/authService";
 import { useToast } from "@/hooks/use-toast";
+
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Loader2 } from "lucide-react";
 
 const Register: React.FC = () => {
   const [username, setUsername] = useState("");
@@ -68,76 +64,99 @@ const Register: React.FC = () => {
   }
 
   return (
-    <Container maxWidth="sm" sx={{ py: 8 }}>
-      <Paper elevation={3} sx={{ p: 4 }}>
-        <Box textAlign="center" mb={4}>
-          <Typography variant="h4" fontWeight={500}>
-            Регистрация
-          </Typography>
-          <Typography variant="body1" color="text.secondary" mt={1}>
-            Создайте свой аккаунт
-          </Typography>
-        </Box>
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <Card className="w-full max-w-md p-6">
+        <div className="text-center mb-6">
+          <h1 className="text-2xl font-bold mb-2">Регистрация</h1>
+          <p className="text-gray-600">Создайте свой аккаунт</p>
+        </div>
+        
         {error && (
-          <Alert severity="error" sx={{ mb: 2 }}>
-            {error}
+          <Alert variant="destructive" className="mb-4">
+            <AlertDescription>{error}</AlertDescription>
           </Alert>
         )}
-        <Box component="form" autoComplete="off" onSubmit={handleSubmit}>
-          <TextField
-            label="Имя пользователя"
-            fullWidth
-            margin="normal"
-            value={username}
-            onChange={e => setUsername(e.target.value)}
-            required
-          />
-          <TextField
-            label="ID сотрудника"
-            fullWidth
-            margin="normal"
-            value={employeeId}
-            onChange={e => setEmployeeId(e.target.value)}
-            required
-            type="number"
-          />
-          <TextField
-            label="Пароль"
-            fullWidth
-            margin="normal"
-            type="password"
-            value={password}
-            onChange={e => setPassword(e.target.value)}
-            required
-          />
-          <TextField
-            label="Подтвердите пароль"
-            fullWidth
-            margin="normal"
-            type="password"
-            value={passwordConfirm}
-            onChange={e => setPasswordConfirm(e.target.value)}
-            required
-          />
-          <Button
-            type="submit"
-            fullWidth
-            variant="contained"
-            sx={{ mt: 3, mb: 2 }}
-            disabled={loading}
-          >
-            {loading ? <CircularProgress size={24} /> : "Зарегистрироваться"}
-          </Button>
-          <Button
-            fullWidth
-            variant="outlined"
-            onClick={() => navigate("/login")}
-          >
-            Уже есть аккаунт? Войти
-          </Button>
-        </Box>
-      </Paper>
-    </Container>
+        
+        <form onSubmit={handleSubmit}>
+          <div className="space-y-4">
+            <div className="space-y-1">
+              <label htmlFor="username" className="block text-sm font-medium">
+                Имя пользователя
+              </label>
+              <Input
+                id="username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                required
+              />
+            </div>
+            
+            <div className="space-y-1">
+              <label htmlFor="employeeId" className="block text-sm font-medium">
+                ID сотрудника
+              </label>
+              <Input
+                id="employeeId"
+                type="number"
+                value={employeeId}
+                onChange={(e) => setEmployeeId(e.target.value)}
+                required
+              />
+            </div>
+            
+            <div className="space-y-1">
+              <label htmlFor="password" className="block text-sm font-medium">
+                Пароль
+              </label>
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+            </div>
+            
+            <div className="space-y-1">
+              <label htmlFor="passwordConfirm" className="block text-sm font-medium">
+                Подтвердите пароль
+              </label>
+              <Input
+                id="passwordConfirm"
+                type="password"
+                value={passwordConfirm}
+                onChange={(e) => setPasswordConfirm(e.target.value)}
+                required
+              />
+            </div>
+            
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={loading}
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Регистрация...
+                </>
+              ) : (
+                "Зарегистрироваться"
+              )}
+            </Button>
+            
+            <Button
+              variant="outline"
+              className="w-full"
+              type="button"
+              onClick={() => navigate("/login")}
+            >
+              Уже есть аккаунт? Войти
+            </Button>
+          </div>
+        </form>
+      </Card>
+    </div>
   );
 };
 
