@@ -20,6 +20,10 @@ const EmployeeSelector: React.FC<EmployeeSelectorProps> = ({ onSelect, selectedI
   
   const selectedEmployee = employees.find(emp => emp.id === selectedId);
 
+  console.log('Current employees data:', employees);
+  console.log('Selected employee ID:', selectedId);
+  console.log('Selected employee:', selectedEmployee);
+
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -74,7 +78,10 @@ const EmployeeSelector: React.FC<EmployeeSelectorProps> = ({ onSelect, selectedI
                   key={employee.id}
                   variant="ghost"
                   className="w-full justify-start mb-1"
-                  onClick={() => onSelect(employee.id)}
+                  onClick={() => {
+                    console.log('Selected employee:', employee);
+                    onSelect(employee.id);
+                  }}
                 >
                   <div className="flex items-center gap-2">
                     <Avatar className="h-6 w-6">

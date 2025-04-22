@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useNavigate, Navigate } from "react-router-dom";
 import { isAuthenticated, register } from "../services/authService";
@@ -12,7 +13,7 @@ import EmployeeSelector from '@/components/EmployeeSelector';
 
 const Register: React.FC = () => {
   const [username, setUsername] = useState("");
-  const [employeeId, setEmployeeId] = useState("");
+  const [employeeId, setEmployeeId] = useState<string>("");
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
   const [loading, setLoading] = useState(false);
@@ -21,6 +22,9 @@ const Register: React.FC = () => {
 
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  console.log('Current employee ID:', employeeId);
+  console.log('Selected employee ID:', selectedEmployeeId);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -98,6 +102,7 @@ const Register: React.FC = () => {
               </label>
               <EmployeeSelector
                 onSelect={(id) => {
+                  console.log('Employee selected with ID:', id);
                   setSelectedEmployeeId(id);
                   setEmployeeId(String(id));
                 }}
