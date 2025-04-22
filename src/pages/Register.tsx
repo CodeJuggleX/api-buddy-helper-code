@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useNavigate, Navigate } from "react-router-dom";
 import { isAuthenticated, register } from "../services/authService";
@@ -9,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2 } from "lucide-react";
+import EmployeeSelector from '@/components/EmployeeSelector';
 
 const Register: React.FC = () => {
   const [username, setUsername] = useState("");
@@ -17,6 +17,7 @@ const Register: React.FC = () => {
   const [passwordConfirm, setPasswordConfirm] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [selectedEmployeeId, setSelectedEmployeeId] = useState<number | undefined>();
 
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -92,15 +93,15 @@ const Register: React.FC = () => {
             </div>
             
             <div className="space-y-1">
-              <label htmlFor="employeeId" className="block text-sm font-medium">
-                ID сотрудника
+              <label className="block text-sm font-medium">
+                Сотрудник
               </label>
-              <Input
-                id="employeeId"
-                type="number"
-                value={employeeId}
-                onChange={(e) => setEmployeeId(e.target.value)}
-                required
+              <EmployeeSelector
+                onSelect={(id) => {
+                  setSelectedEmployeeId(id);
+                  setEmployeeId(String(id));
+                }}
+                selectedId={selectedEmployeeId}
               />
             </div>
             
