@@ -1,4 +1,3 @@
-
 import { jwtDecode } from "jwt-decode";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://192.168.38.236:8000/api/v1';
@@ -72,7 +71,6 @@ const clearAuth = () => {
   notifyListeners();
 };
 
-// Fixed type signature to match the client code
 const login = async (credentials: { username: string; password: string }) => {
   const response = await fetch(`${API_BASE_URL}/auth/login/`, {
     method: "POST",
@@ -167,7 +165,6 @@ const setIntervalAuth = async (
   startRefreshTokenInterval(refreshToken);
 };
 
-// Регистрация пользователя
 export const register = async ({
   username,
   password,
@@ -187,13 +184,14 @@ export const register = async ({
       },
       body: JSON.stringify({ username, password, password_confirm, employee_id }),
     });
+
     if (!response.ok) {
       const data = await response.json();
       throw new Error(
         data.detail || data.username?.[0] || 'Ошибка регистрации'
       );
     }
-    // регистрация успешна; можно добавить вход или редирект
+    // регистрация успешна; редирект на страницу входа будет осуществлен в компоненте
   } catch (error: any) {
     console.error('Registration error:', error);
     throw error;
