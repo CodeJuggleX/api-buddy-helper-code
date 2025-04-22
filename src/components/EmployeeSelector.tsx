@@ -7,45 +7,17 @@ import { Search, User } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Employee } from '@/types/employee';
+import { useEmployees } from '@/hooks/useEmployees';
 
 interface EmployeeSelectorProps {
   onSelect: (employeeId: number) => void;
   selectedId?: number;
 }
 
-const mockEmployees: Employee[] = [
-  {
-    id: 1,
-    surname: "Иванов",
-    name: "Иван",
-    last_name: "Иванович",
-    image: "",
-    full_path_image: "",
-    work_phone_num: "+7 (999) 123-45-67",
-    personal_phone_num: "+7 (999) 765-43-21",
-    email: "ivanov@example.com",
-    position: {
-      id: 1,
-      title: "Разработчик"
-    },
-    department: "IT отдел",
-    room_number: "101",
-    full_name: "Иванов Иван Иванович",
-    order: 1
-  },
-  // ... в будущем здесь будут данные из API
-];
-
 const EmployeeSelector: React.FC<EmployeeSelectorProps> = ({ onSelect, selectedId }) => {
   const [search, setSearch] = useState("");
-  const [employees] = useState<Employee[]>(mockEmployees);
-
-  const filteredEmployees = employees.filter(emp => 
-    emp.full_name.toLowerCase().includes(search.toLowerCase()) ||
-    emp.position.title.toLowerCase().includes(search.toLowerCase()) ||
-    emp.department.toLowerCase().includes(search.toLowerCase())
-  );
-
+  const { data: employees = [], isLoading, error } = useEmployees(search);
+  
   const selectedEmployee = employees.find(emp => emp.id === selectedId);
 
   return (
@@ -84,12 +56,20 @@ const EmployeeSelector: React.FC<EmployeeSelectorProps> = ({ onSelect, selectedI
         </div>
         <ScrollArea className="h-72">
           <div className="p-2">
-            {filteredEmployees.length === 0 ? (
+            {isLoading ? (
+              <p className="text-sm text-center text-muted-foreground p-4">
+                Загрузка...
+              </p>
+            ) : error ? (
+              <p className="text-sm text-center text-destructive p-4">
+                Ошибка загрузки данных
+              </p>
+            ) : employees.length === 0 ? (
               <p className="text-sm text-center text-muted-foreground p-4">
                 Сотрудники не найдены
               </p>
             ) : (
-              filteredEmployees.map((employee) => (
+              employees.map((employee) => (
                 <Button
                   key={employee.id}
                   variant="ghost"
