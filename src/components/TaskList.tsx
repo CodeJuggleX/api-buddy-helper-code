@@ -1,42 +1,11 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-
-// Временные моковые данные
-const mockTasks = [
-  {
-    id: 1,
-    title: "Создать дизайн главной страницы",
-    description: "Необходимо разработать дизайн главной страницы в соответствии с брендбуком",
-    status: "В процессе",
-    priority: "Высокий",
-    assignee: { name: "Алексей К.", avatar: "" },
-    created_by: { name: "Иван С.", avatar: "" },
-    created_at: "2025-04-20"
-  },
-  {
-    id: 2,
-    title: "Исправить баг с авторизацией",
-    description: "При авторизации через Google не сохраняются данные пользователя",
-    status: "Новая",
-    priority: "Критический",
-    assignee: { name: "Мария П.", avatar: "" },
-    created_by: { name: "Иван С.", avatar: "" },
-    created_at: "2025-04-21"
-  },
-  {
-    id: 3,
-    title: "Обновить документацию API",
-    description: "Добавить описание новых эндпоинтов и обновить примеры запросов",
-    status: "Выполнено",
-    priority: "Средний",
-    assignee: { name: "Сергей Л.", avatar: "" },
-    created_by: { name: "Мария П.", avatar: "" },
-    created_at: "2025-04-19"
-  }
-];
+import { fetchTasks } from '../services/taskService';
+import { Task } from '../types/task';
+import { Loader2 } from "lucide-react";
 
 // Функция для определения цвета статуса задачи
 const getStatusColor = (status: string) => {
@@ -44,6 +13,7 @@ const getStatusColor = (status: string) => {
     case 'Новая': return 'bg-blue-500';
     case 'В процессе': return 'bg-yellow-500';
     case 'Выполнено': return 'bg-green-500';
+    case 'Завершена': return 'bg-green-500';
     default: return 'bg-gray-500';
   }
 };
@@ -59,13 +29,68 @@ const getPriorityColor = (priority: string) => {
   }
 };
 
+// Функция форматирования даты
+const formatDate = (dateString: string) => {
+  try {
+    return new Date(dateString).toISOString().split('T')[0];
+  } catch (e) {
+    return dateString;
+  }
+};
+
 interface TaskListProps {
   filter: 'all' | 'assigned' | 'created';
 }
 
 const TaskList: React.FC<TaskListProps> = ({ filter }) => {
-  // Фильтрация задач (здесь будет логика фильтрации по пользователю)
-  const filteredTasks = mockTasks;
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  
+  useEffect(() => {
+    const loadTasks = async () => {
+      try {
+        setLoading(true);
+        const data = await fetchTasks();
+        setTasks(data);
+        setError(null);
+      } catch (err) {
+        setError('Ошибка при загрузке задач');
+        console.error('Error loading tasks:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    loadTasks();
+  }, []);
+
+  // Фильтрация задач по типу
+  const filteredTasks = tasks.filter(task => {
+    // Здесь логика фильтрации по пользователю
+    // Можно добавить проверку на текущего пользователя
+    if (filter === 'all') return true;
+    
+    // Для примера (вы можете уточнить логику):
+    // const currentUserId = getCurrentUser()?.id;
+    return true; // Пока возвращаем все задачи
+  });
+  
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center py-20">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+  
+  if (error) {
+    return (
+      <div className="text-center py-10">
+        <p className="text-red-500">{error}</p>
+      </div>
+    );
+  }
   
   if (filteredTasks.length === 0) {
     return (
@@ -81,10 +106,10 @@ const TaskList: React.FC<TaskListProps> = ({ filter }) => {
         <Card key={task.id} className="hover:shadow-md transition-shadow">
           <CardHeader className="pb-2">
             <div className="flex justify-between">
-              <CardTitle className="text-lg font-medium">{task.title}</CardTitle>
+              <CardTitle className="text-lg font-medium">{task.task_name}</CardTitle>
               <div className="flex gap-2">
-                <Badge className={`${getStatusColor(task.status)} text-white`}>{task.status}</Badge>
-                <Badge className={`${getPriorityColor(task.priority)} text-white`}>{task.priority}</Badge>
+                <Badge className={`${getStatusColor(task.task_status)} text-white`}>{task.task_status}</Badge>
+                <Badge className={`${getPriorityColor(task.task_priority)} text-white`}>{task.task_priority}</Badge>
               </div>
             </div>
           </CardHeader>
@@ -93,12 +118,14 @@ const TaskList: React.FC<TaskListProps> = ({ filter }) => {
             <div className="flex items-center justify-between text-xs text-gray-500">
               <div className="flex items-center gap-2">
                 <Avatar className="h-6 w-6">
-                  <AvatarImage src={task.assignee.avatar} />
-                  <AvatarFallback>{task.assignee.name.substring(0, 2)}</AvatarFallback>
+                  <AvatarImage src={task.employee_info.full_path_image} />
+                  <AvatarFallback>
+                    {task.employee_info.name.substring(0, 1)}{task.employee_info.surname.substring(0, 1)}
+                  </AvatarFallback>
                 </Avatar>
-                <span>{task.assignee.name}</span>
+                <span>{task.employee_info.full_name || `${task.employee_info.name} ${task.employee_info.surname}`}</span>
               </div>
-              <span>{task.created_at}</span>
+              <span>{formatDate(task.deadline)}</span>
             </div>
           </CardContent>
         </Card>
